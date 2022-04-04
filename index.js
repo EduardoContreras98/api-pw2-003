@@ -1,32 +1,21 @@
 const express = require('express');
+const routerApi = require('./routes');
+const { logErrors, boomErrorHandler, errorHandler } = require('./middlewares/error.handler');
+const db = require('./db');
+const { DBCONNECTION } = require('./consts.json');
 const app = express();
 const port = 3000;
 
-//Endpoint
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    statuscode: 200,
-    message: 'Hola soy un endpoint'
-  });
-});
+db(DBCONNECTION);
 
-app.get('/products', (req, res) => {
-  res.json([{
-    name: 'JABON EN BARRA',
-    price: 25.50
-  },
-  {
-    name: 'DETERGENTE EN GEL',
-    price: 15.50
-  },
-  {
-    name: 'PASTA DE DIENTES COLGATE',
-    price: 17.5
-  },
-  ]);
-});
+app.use(express.json()); //UTILIZAREMOS JSON COMO FORMATO DE DATOS
+routerApi(app); //RUTAS DE NUESTRAS ENTIDADES
+//MIDDLEWARE CODIGO INTERMEDIARIO => MANEJO DE ERRORES BOOM, VALIDACIONES JOI
+app.use(logErrors);
+app.use(boomErrorHandler);
+app.use(errorHandler);
 
 app.listen(port, () =>{
+  // eslint-disable-next-line no-console
   console.log('Estoy en el puerto ' + port);
 });
